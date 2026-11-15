@@ -66,16 +66,19 @@
       ${E.erro === "rede" ? `<div class="alerta">Sem conexão agora. Mostrando o que já tinha.</div>` : ""}
       ${!E.voce ? `<button class="botao secundario pequeno" data-acao="localizar">📍 Mostrar o que está perto de mim</button>` : ""}
       <div class="alternar"><button data-modo="lista" class="${E.modo === "lista" ? "marcado" : ""}">☰ Lista</button><button data-modo="mapa" class="${E.modo === "mapa" ? "marcado" : ""}">🗺️ Mapa</button></div>`;
-    if (Demo.ativo) html += `<div class="campo lugar-sim">
+    let lugar = "";
+    if (Demo.ativo) lugar = `<div class="campo lugar-sim">
       <span class="pergunta">Minha localização</span>
       <div class="alternar" style="margin:0 0 8px">
         <button data-modo-local="simulado" class="${Demo.modoLocal() === "simulado" ? "marcado" : ""}">🧪 Simulada</button>
         <button data-modo-local="real" class="${Demo.modoLocal() === "real" ? "marcado" : ""}">📍 Real (GPS)</button></div>
       ${Demo.modoLocal() === "simulado" ? `<select id="lugar-sim" class="entrada" aria-label="Lugar simulado">${Object.entries(Demo.lugares).map(([k, l]) => `<option value="${k}"${k === Demo.lugar() ? " selected" : ""}>${l.nome}</option>`).join("")}</select>`
         : `<p class="nota" style="margin:0">Usando o GPS do celular. Longe de Fortaleza, as bancas fictícias aparecem bem distantes.</p>`}</div>`;
-    if (Demo.ativo && E.modo === "lista") html += cartaoMovimento();
+    // No mapa, o mapa vem logo abaixo dos botões; o lugar simulado fica embaixo dele.
+    if (E.modo === "mapa") return html + (E.carregado ? `<div id="mapa"></div>` : `<p class="suave">Procurando bancas…</p>`) + lugar;
+    html += lugar;
+    if (Demo.ativo) html += cartaoMovimento();
     if (!E.carregado) return html + `<p class="suave">Procurando bancas…</p>`;
-    if (E.modo === "mapa") return html + `<div id="mapa"></div>`;
     if (!lista.length) return html + `<div class="cartao vazio"><div class="emoji">🌴</div>
       <p>${E.busca || E.categoria !== "tudo" ? "Ninguém aberto com isso por perto agora." : "Nenhuma banca aberta por perto agora."}</p>
       <p class="nota">As bancas e os ambulantes aparecem quando abrem no app do vendedor.</p></div>`;
@@ -120,11 +123,20 @@
       <p class="nota" style="margin-top:6px">Simulação de homologação: nada disso é real.</p>
     </div>`;
   }
+  // O mapa ocupa o resto da tela do celular, sem precisar rolar.
+  function ajustarAlturaMapa() {
+    const el = $("mapa"); if (!el) return;
+    const menu = document.querySelector(".abas, nav");
+    const baixo = menu && getComputedStyle(menu).position === "fixed" ? menu.offsetHeight : 0;
+    const topo = el.getBoundingClientRect().top + window.scrollY;
+    el.style.height = Math.max(300, window.innerHeight - topo - baixo - 16) + "px";
+  }
   function desenharMapa() {
     if (!$("mapa")) return;
     if (mapa) mapa.remove();
     marcadores = new Map();
     const lista = filtrados();
+    ajustarAlturaMapa();
     mapa = L.map("mapa").setView(E.voce ? [E.voce.lat, E.voce.lon] : [-3.74, -38.45], E.voce ? 15 : 12);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(mapa);
     if (E.voce) L.marker([E.voce.lat, E.voce.lon], { icon: L.divIcon({ className: "", html: '<div class="voce"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(mapa);
@@ -423,7 +435,7 @@
           const v = E.vendedores.find(x => x.id === E.vitrine.id);
           if (v) { E.vitrine = v; redesenhar(); }
         }
-      }, 3000);
+      }, 5000);
     } else setInterval(atualizar, 60e3);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) atualizar(); });
   })();

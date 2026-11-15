@@ -99,21 +99,21 @@
   });
 
   // A cada passo: ambulantes andam pela areia, produtos acabam e voltam, bancas abrem e fecham.
-  // Tempo acelerado: cada passo de 3 s vale uns 30 s de praia.
+  // Ritmo calmo: a cada 5 s um ambulante anda uns 15 m.
   let passo = function () {
     lista.forEach(v => {
       if (v.tipo === "ambulante" && v.aberto && !v.indoAte) {
         const tamanho = { "Praia do Futuro": 4100, "Iracema e Meireles": 2000, "Mucuripe": 450 }[v.praia];
-        v.t += v.sentido * (35 / tamanho) * (0.6 + sorte() * 0.8);
+        v.t += v.sentido * (15 / tamanho) * (0.6 + sorte() * 0.8);
         if (v.t > 1 || v.t < 0) { v.sentido *= -1; v.t = Math.max(0, Math.min(1, v.t)); }
         Object.assign(v, pontoNaPraia(v.praia, v.t));
         v.atualizado_em = agoraIso();
       }
-      v.produtos.forEach(p => { if (sorte() < (p.disponivel ? 0.004 : 0.03)) p.disponivel = !p.disponivel; });
-      if (!v.indoAte && sorte() < (v.aberto ? 0.002 : 0.02)) v.aberto = !v.aberto;
+      v.produtos.forEach(p => { if (sorte() < (p.disponivel ? 0.0015 : 0.012)) p.disponivel = !p.disponivel; });
+      if (!v.indoAte && sorte() < (v.aberto ? 0.0006 : 0.008)) v.aberto = !v.aberto;
     });
   };
-  setInterval(() => passo(), 3000);
+  setInterval(() => passo(), 5000);
 
   const copia = v => JSON.parse(JSON.stringify(v));
   const visiveis = () => lista.filter(v => v.aberto).map(copia);
@@ -129,14 +129,14 @@
       if (status === "a_caminho" && v.tipo === "ambulante" && cliente.lat) v.indoAte = { lat: cliente.lat, lon: cliente.lon };
       if (status === "entregue") v.indoAte = null;
     }, depois);
-    muda("aceito", 5000); muda("a_caminho", 11000); muda("entregue", 30000);
+    muda("aceito", 12000); muda("a_caminho", 30000); muda("entregue", 90000);
     return pedido;
   }
   // Ambulante a caminho: anda em direção ao cliente.
   setInterval(() => {
     lista.forEach(v => {
       if (!v.indoAte) return;
-      v.lat += (v.indoAte.lat - v.lat) * 0.18; v.lon += (v.indoAte.lon - v.lon) * 0.18; v.atualizado_em = agoraIso();
+      v.lat += (v.indoAte.lat - v.lat) * 0.05; v.lon += (v.indoAte.lon - v.lon) * 0.05; v.atualizado_em = agoraIso();
     });
   }, 1000);
 
@@ -165,12 +165,12 @@
     const total = itens.reduce((a, x) => a + x.qtd * x.preco_centavos, 0);
     resumo.pedidos++; resumo.emAndamento++;
     registrar("🧺", `${nome} pediu ${itens.map(x => `${x.qtd}× ${x.nome}`).join(", ")} · <b>${v.nome}</b>`);
-    setTimeout(() => registrar("👍", `<b>${v.nome}</b> aceitou o pedido de ${nome}`), 4000 + sorte() * 4000);
-    if (v.faz_entrega) setTimeout(() => registrar("🛵", `${v.nome} levando para ${nome} (${escolher(LUGARES)})`), 10000 + sorte() * 6000);
+    setTimeout(() => registrar("👍", `<b>${v.nome}</b> aceitou o pedido de ${nome}`), 10000 + sorte() * 10000);
+    if (v.faz_entrega) setTimeout(() => registrar("🛵", `${v.nome} levando para ${nome} (${escolher(LUGARES)})`), 25000 + sorte() * 15000);
     setTimeout(() => {
       resumo.entregues++; resumo.emAndamento--; resumo.faturamentoCentavos += total;
       registrar("✅", `Entregue para ${nome} · ${(total / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`);
-    }, 22000 + sorte() * 15000);
+    }, 60000 + sorte() * 40000);
   }
   // abrir/fechar e "acabou" também viram notícias no movimento
   const passoOriginal = passo;
@@ -182,7 +182,7 @@
       v.produtos.forEach((p, j) => { if (antes[i][1][j] && !p.disponivel) registrar("🚫", `Acabou ${p.nome} · ${v.nome}`); });
     });
   };
-  (function agendar() { setTimeout(() => { pedidoFicticio(); agendar(); }, 5000 + sorte() * 7000); })();
+  (function agendar() { setTimeout(() => { pedidoFicticio(); agendar(); }, 20000 + sorte() * 25000); })();
   setTimeout(pedidoFicticio, 1200);
 
   // Onde a pessoa "está" na simulação.
