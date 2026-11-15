@@ -126,12 +126,26 @@
     const muda = (status, depois) => setTimeout(() => {
       if (!pedido || pedido.status === "cancelado") return;
       pedido.status = status; pedido.historico.push([status, Date.now()]);
-      if (status === "a_caminho" && v.tipo === "ambulante" && cliente.lat) v.indoAte = { lat: cliente.lat, lon: cliente.lon };
-      if (status === "entregue") v.indoAte = null;
+      // Entregador sai do vendedor e anda até o cliente (ambulante: é o próprio vendedor).
+      if (status === "a_caminho" && cliente.lat) {
+        pedido.entregador = { lat: v.lat, lon: v.lon };
+        if (v.tipo === "ambulante") v.indoAte = { lat: cliente.lat, lon: cliente.lon };
+      }
+      if (status === "entregue") { v.indoAte = null; if (pedido.entregador && cliente.lat) pedido.entregador = { lat: cliente.lat, lon: cliente.lon }; }
     }, depois);
     muda("aceito", 12000); muda("a_caminho", 30000); muda("entregue", 90000);
     return pedido;
   }
+  // Entregador a caminho: anda em linha reta até o cliente, no passo de quem caminha na areia.
+  setInterval(() => {
+    if (!pedido || pedido.status !== "a_caminho" || !pedido.entregador || !pedido.cliente.lat) return;
+    const e = pedido.entregador, c = pedido.cliente;
+    const falta = Math.hypot((c.lat - e.lat) * 111000, (c.lon - e.lon) * 111000);
+    if (falta < 8) return;
+    const passoM = Math.max(6, falta / 50); // chega em ~1 min, sem "pular"
+    const f = Math.min(1, passoM / falta);
+    e.lat += (c.lat - e.lat) * f; e.lon += (c.lon - e.lon) * f;
+  }, 1000);
   // Ambulante a caminho: anda em direção ao cliente.
   setInterval(() => {
     lista.forEach(v => {

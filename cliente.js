@@ -252,7 +252,7 @@
   // ---------- acompanhar pedido (na demonstração; na fase 2 vem do banco) ----------
   const PASSOS = [["novo", "📨", "Pedido enviado", "Esperando o vendedor ver"], ["aceito", "👍", "Aceito", "O vendedor está preparando"],
     ["a_caminho", "🛵", "A caminho", "Indo até você na areia"], ["entregue", "✅", "Entregue", "Bom proveito!"]];
-  let mapaPedido = null, marcaVendedor = null;
+  let mapaPedido = null, marcaVendedor = null, marcaEntrega = null, linhaEntrega = null;
   function telaAcompanhar() {
     const p = Demo.ativo && Demo.pedido();
     if (!p) return `<button class="link-botao" style="text-align:left" data-acao="inicio">← Início</button><div class="cartao vazio"><p>Nenhum pedido em andamento.</p></div>`;
@@ -262,12 +262,12 @@
     return `
       <h1>Pedido #${p.codigo}</h1>
       <p class="suave">${esc(v.nome)}</p>
+      ${p.status === "a_caminho" || p.status === "aceito" ? `<div id="mapa-pedido"></div><div id="falta-pedido" class="falta-pedido"></div>` : ""}
       <div class="cartao passos-pedido">${PASSOS.map(([st, em, titulo, sub], i) => `
         <div class="passo-pedido ${i < idx ? "feito" : i === idx ? "atual" : ""}">
           <span class="bolinha">${i <= idx ? em : "○"}</span>
           <div><b>${titulo}</b>${i === idx ? `<div class="nota" style="margin:0">${sub}</div>` : ""}</div>
         </div>`).join("")}</div>
-      ${p.status === "a_caminho" || p.status === "aceito" ? `<div id="mapa-pedido"></div>` : ""}
       <div class="cartao">
         ${p.itens.map(x => `<div class="resumo-item"><span>${x.qtd}× ${esc(x.nome)}</span><b>${U.reais(x.qtd * x.preco_centavos)}</b></div>`).join("")}
         <div class="total"><span>Total</span><span>${U.reais(total)}</span></div>
@@ -278,17 +278,31 @@
       ${p.status === "entregue" ? `<button class="botao" data-acao="inicio">Fazer outro pedido</button>` : ""}
       <a class="botao whats pequeno" href="${U.linkWhats(v.whatsapp, `Olá! Sobre o pedido #${p.codigo}.`)}" target="_blank" rel="noopener">💬 Falar com o vendedor</a>`;
   }
+  const iconeEntrega = L.divIcon({ className: "", iconSize: [54, 54], iconAnchor: [27, 27], html: '<div class="entregador">🛵</div>' });
   function desenharMapaPedido() {
     const p = Demo.ativo && Demo.pedido();
     if (!p || !$("mapa-pedido")) { mapaPedido = null; return; }
-    const v = p.vendedor;
+    const v = p.vendedor, c = p.cliente, e = p.entregador;
     if (!mapaPedido || !document.body.contains(mapaPedido.getContainer())) {
       mapaPedido = L.map("mapa-pedido", { zoomControl: false }).setView([v.lat, v.lon], 16);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap" }).addTo(mapaPedido);
-      if (p.cliente.lat) L.marker([p.cliente.lat, p.cliente.lon], { icon: L.divIcon({ className: "", html: '<div class="voce"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(mapaPedido);
+      if (c.lat) L.marker([c.lat, c.lon], { zIndexOffset: 500, icon: L.divIcon({ className: "", html: '<div class="voce-pedido"><div class="voce"></div><span>Você</span></div>', iconSize: [60, 44], iconAnchor: [30, 9] }) }).addTo(mapaPedido);
       marcaVendedor = L.marker([v.lat, v.lon], { icon: iconeVendedor(v) }).addTo(mapaPedido);
-      if (p.cliente.lat) mapaPedido.fitBounds([[v.lat, v.lon], [p.cliente.lat, p.cliente.lon]], { padding: [40, 40], maxZoom: 17 });
-    } else marcaVendedor.setLatLng([v.lat, v.lon]);
+      marcaEntrega = e ? L.marker([e.lat, e.lon], { icon: iconeEntrega, zIndexOffset: 1000 }).addTo(mapaPedido) : null;
+      linhaEntrega = e && c.lat ? L.polyline([[e.lat, e.lon], [c.lat, c.lon]], { color: "#1351b4", weight: 4, dashArray: "8 10" }).addTo(mapaPedido) : null;
+      if (c.lat) mapaPedido.fitBounds([[v.lat, v.lon], [c.lat, c.lon]], { padding: [50, 50], maxZoom: 17 });
+    } else {
+      marcaVendedor.setLatLng([v.lat, v.lon]);
+      if (e && marcaEntrega) marcaEntrega.setLatLng([e.lat, e.lon]);
+      if (e && linhaEntrega) linhaEntrega.setLatLngs([[e.lat, e.lon], [c.lat, c.lon]]);
+    }
+    const falta = $("falta-pedido");
+    if (falta) {
+      if (e && c.lat) {
+        const m = U.distanciaM(e, c);
+        falta.innerHTML = m < 15 ? "🛵 Chegando! Olhe em volta." : `🛵 Entregador a <b>${U.textoDistancia(m)}</b> de você`;
+      } else falta.textContent = "👍 O vendedor está preparando. Logo sai para entrega.";
+    }
   }
   let ultimoStatus = null;
   setInterval(() => { // acompanha o pedido em andamento

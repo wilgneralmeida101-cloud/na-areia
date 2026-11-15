@@ -66,7 +66,7 @@ main { padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
 .passo-pedido.atual { color: var(--azul-escuro); }
 .passo-pedido.atual .bolinha { background: var(--azul-claro); box-shadow: 0 0 0 4px rgba(19,81,180,.15); animation: pulsar 1.4s infinite; }
 @keyframes pulsar { 50% { box-shadow: 0 0 0 9px rgba(19,81,180,.05); } }
-#mapa-pedido { height: 240px; border-radius: var(--raio); margin-bottom: 14px; box-shadow: var(--sombra); z-index: 0; }
+#mapa-pedido { height: 46vh; min-height: 280px; border-radius: var(--raio); margin-bottom: 8px; box-shadow: var(--sombra); z-index: 0; }
 
 .movimento { border: 2px solid #f2d36b; background: #fffdf3; }
 .movimento .ao-vivo { margin-left: auto; font-size: 15px; color: var(--vermelho); animation: piscar 1.6s infinite; }
@@ -82,3 +82,7 @@ main { padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
 .lugar-sim { background: #fffdf3; border: 2px dashed #f2d36b; border-radius: 14px; padding: 10px 12px; }
 .lugar-sim label { font-size: 17px; margin-bottom: 6px; }
 .lugar-sim .entrada { min-height: 50px; background: #fff; font-size: 20px; }
+.entregador { width: 54px; height: 54px; border-radius: 50%; background: var(--azul); border: 4px solid #fff; display: grid; place-items: center; font-size: 30px; box-shadow: 0 3px 10px rgba(0,0,0,.4); animation: pulsar 1.4s infinite; }
+.voce-pedido { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.voce-pedido span { background: var(--azul-escuro); color: #fff; font-weight: 800; font-size: 14px; padding: 1px 8px; border-radius: 10px; }
+.falta-pedido { font-size: 19px; text-align: center; margin: 0 0 14px; color: var(--azul-escuro); }
