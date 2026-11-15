@@ -66,7 +66,6 @@
       ${E.erro === "rede" ? `<div class="alerta">Sem conexão agora. Mostrando o que já tinha.</div>` : ""}
       ${!E.voce ? `<button class="botao secundario pequeno" data-acao="localizar">📍 Mostrar o que está perto de mim</button>` : ""}`;
     if (E.modo === "mapa") return html + (E.carregado ? `<div id="mapa"></div>` : `<p class="suave">Procurando bancas…</p>`);
-    if (Demo.ativo) html += cartaoMovimento();
     if (!E.carregado) return html + `<p class="suave">Procurando bancas…</p>`;
     if (!lista.length) return html + `<div class="cartao vazio"><div class="emoji">🌴</div>
       <p>${E.busca || E.categoria !== "tudo" ? "Ninguém aberto com isso por perto agora." : "Nenhuma banca aberta por perto agora."}</p>
@@ -100,17 +99,6 @@
       if (m) { m.setLatLng([v.lat, v.lon]); m.setPopupContent(popupVendedor(v)); }
       else marcadores.set(v.id, L.marker([v.lat, v.lon], { icon: iconeVendedor(v), title: v.nome }).addTo(mapa).bindPopup(popupVendedor(v)));
     });
-  }
-  function cartaoMovimento() {
-    const r = Demo.resumo(), ev = Demo.eventos().slice(0, 3);
-    return `<section class="movimento" aria-label="Movimento na orla">
-      <div class="movimento-topo"><span class="ao-vivo"><i></i>Ao vivo</span><b>Movimento na orla</b></div>
-      <div class="contadores">
-        <div><b>${r.abertos}</b><span>abertos</span></div><div><b>${r.ambulantesAndando}</b><span>andando</span></div>
-        <div><b>${r.pedidos}</b><span>pedidos hoje</span></div><div><b>${U.reais(r.faturamentoCentavos).replace(/,\d\d$/, "")}</b><span>vendido</span></div>
-      </div>
-      ${ev.map(e => `<div class="evento"><span>${e.emoji}</span><span>${e.texto}</span><small>${Math.max(1, Math.round((Date.now() - e.em) / 1000))} s</small></div>`).join("")}
-    </section>`;
   }
   // O mapa ocupa o resto da tela do celular, sem precisar rolar.
   function ajustarAlturaMapa() {
