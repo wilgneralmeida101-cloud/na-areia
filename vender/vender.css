@@ -30,3 +30,4 @@
 .preco-campo span { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-weight: 800; color: var(--suave); }
 .preco-campo .entrada { padding-left: 54px; }
 .voltar-link { text-align: left; padding: 4px 0 10px; margin: 0; }
+.faixa-demo { background: var(--amarelo); color: #3d2e00; text-align: center; font-size: 15px; font-weight: 600; padding: 5px 10px; }

@@ -18,10 +18,28 @@
 <body>
   <header class="topo">
     <img class="logo" src="icone.svg" alt="">
-    <div><div class="nome">Na Areia</div><div class="sub" id="onde">O que tem na praia perto de você</div></div>
+    <div class="topo-texto">
+      <div class="nome">Na Areia</div>
+      <button type="button" class="chip-local" data-acao="trocar-local" aria-label="Trocar localização">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+        <span id="onde">Procurando você…</span><span class="seta-baixo" aria-hidden="true">▾</span>
+      </button>
+    </div>
   </header>
   <main id="conteudo" aria-live="polite"><p class="suave">Procurando bancas…</p></main>
   <div id="barra-pedido" class="barra-pedido" hidden></div>
+  <nav id="menu" class="abas" aria-label="Menu">
+    <button type="button" data-modo="lista">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.4" fill="currentColor"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor"/><circle cx="4.5" cy="18" r="1.4" fill="currentColor"/></svg>
+      Perto de mim</button>
+    <button type="button" data-modo="mapa">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M9 4 3 6.5v13.5L9 17.5l6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>
+      Mapa</button>
+    <button type="button" data-acao="meu-pedido" id="aba-pedido" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg>
+      Meu pedido<span class="bolinha-aviso" id="aviso-pedido" hidden></span></button>
+  </nav>
+  <div id="folha" class="folha-raiz" hidden></div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="comum/config.js"></script>

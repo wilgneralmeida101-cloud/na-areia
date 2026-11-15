@@ -463,7 +463,7 @@
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
 
   if (window.NUVEM && NUVEM.homologacao) document.body.insertAdjacentHTML("afterbegin",
-    `<div class="faixa-demo">🧪 AMBIENTE DE HOMOLOGAÇÃO · testes · o app dos clientes mostra também bancas fictícias</div>`);
+    `<div class="faixa-demo">🧪 <b>Homologação</b> · ambiente de testes</div>`);
 
   // ---------- começo ----------
   (async () => {

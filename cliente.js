@@ -59,40 +59,30 @@
     if (E.erro === "preparando") return `<div class="cartao vazio"><div class="emoji">🏗️</div><p>O Na Areia está quase pronto. Volte em breve!</p></div>`;
     const lista = filtrados();
     let html = `
-      <div class="busca"><span class="lupa">🔍</span>
+      <div class="busca"><svg class="lupa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></svg>
         <input id="busca" class="entrada" type="search" placeholder="O que você quer? Ex.: milho, açaí" value="${esc(E.busca)}" autocomplete="off" enterkeyhint="search"></div>
       <div class="categorias">${[["tudo", "🏖️", "Tudo"], ...Object.entries(U.CATEGORIAS).map(([k, [e, t]]) => [k, e, t])].map(([k, e, t]) =>
-        `<button type="button" data-categoria="${k}" class="${E.categoria === k ? "marcado" : ""}"><span class="emoji">${e}</span>${t}</button>`).join("")}</div>
+        `<button type="button" data-categoria="${k}" class="${E.categoria === k ? "marcado" : ""}" aria-pressed="${E.categoria === k}"><span class="emoji">${e}</span>${t}</button>`).join("")}</div>
       ${E.erro === "rede" ? `<div class="alerta">Sem conexão agora. Mostrando o que já tinha.</div>` : ""}
-      ${!E.voce ? `<button class="botao secundario pequeno" data-acao="localizar">📍 Mostrar o que está perto de mim</button>` : ""}
-      <div class="alternar"><button data-modo="lista" class="${E.modo === "lista" ? "marcado" : ""}">☰ Lista</button><button data-modo="mapa" class="${E.modo === "mapa" ? "marcado" : ""}">🗺️ Mapa</button></div>`;
-    let lugar = "";
-    if (Demo.ativo) lugar = `<div class="campo lugar-sim">
-      <span class="pergunta">Minha localização</span>
-      <div class="alternar" style="margin:0 0 8px">
-        <button data-modo-local="simulado" class="${Demo.modoLocal() === "simulado" ? "marcado" : ""}">🧪 Simulada</button>
-        <button data-modo-local="real" class="${Demo.modoLocal() === "real" ? "marcado" : ""}">📍 Real (GPS)</button></div>
-      ${Demo.modoLocal() === "simulado" ? `<select id="lugar-sim" class="entrada" aria-label="Lugar simulado">${Object.entries(Demo.lugares).map(([k, l]) => `<option value="${k}"${k === Demo.lugar() ? " selected" : ""}>${l.nome}</option>`).join("")}</select>`
-        : `<p class="nota" style="margin:0">Usando o GPS do celular. Longe de Fortaleza, as bancas fictícias aparecem bem distantes.</p>`}</div>`;
-    // No mapa, o mapa vem logo abaixo dos botões; o lugar simulado fica embaixo dele.
-    if (E.modo === "mapa") return html + (E.carregado ? `<div id="mapa"></div>` : `<p class="suave">Procurando bancas…</p>`) + lugar;
-    html += lugar;
+      ${!E.voce ? `<button class="botao secundario pequeno" data-acao="localizar">📍 Mostrar o que está perto de mim</button>` : ""}`;
+    if (E.modo === "mapa") return html + (E.carregado ? `<div id="mapa"></div>` : `<p class="suave">Procurando bancas…</p>`);
     if (Demo.ativo) html += cartaoMovimento();
     if (!E.carregado) return html + `<p class="suave">Procurando bancas…</p>`;
     if (!lista.length) return html + `<div class="cartao vazio"><div class="emoji">🌴</div>
       <p>${E.busca || E.categoria !== "tudo" ? "Ninguém aberto com isso por perto agora." : "Nenhuma banca aberta por perto agora."}</p>
       <p class="nota">As bancas e os ambulantes aparecem quando abrem no app do vendedor.</p></div>`;
-    return html + `<h2>${lista.length} ${lista.length === 1 ? "aberto" : "abertos"}${E.voce ? " perto de você" : ""}</h2>` + lista.map(v => {
+    return html + `<div class="cabeca-lista"><h2>${lista.length} ${lista.length === 1 ? "aberto agora" : "abertos agora"}</h2>${E.voce ? `<span>mais perto primeiro</span>` : ""}</div>` + lista.map(v => {
       const itens = (E.busca || E.categoria !== "tudo" ? v.combinam : v.produtos.filter(p => p.disponivel));
       return `
       <a class="loja" href="#/v/${v.id}">
         <div class="capa" style="${v.foto_url ? `background-image:url('${esc(v.foto_url)}')` : ""}">${v.foto_url ? "" : v.tipo === "ambulante" ? "🚶" : "🏖️"}</div>
         <div class="info">
           <div class="nome-loja">${esc(v.nome)}</div>
-          <div class="detalhe">${v.tipo === "ambulante" ? "🚶 Ambulante" : "🏖️ Banca"}${v.dist != null ? ` · ${U.textoDistancia(v.dist)}` : ""}</div>
-          ${itens.length ? `<div class="tem">${itens.slice(0, 4).map(p => `${esc(p.nome)} ${U.reais(p.preco_centavos)}`).join(" · ")}</div>` : ""}
-          <div class="etiquetas"><span class="etiqueta verde">● Aberto</span>${v.faz_entrega ? `<span class="etiqueta azul">🛵 Leva até você</span>` : ""}</div>
+          <div class="detalhe">${v.tipo === "ambulante" ? "Ambulante" : "Banca"}${v.dist != null ? ` · ${U.textoDistancia(v.dist)}` : ""}</div>
+          ${itens.length ? `<div class="tem">${itens.slice(0, 3).map(p => `${esc(p.nome)} <b>${U.reais(p.preco_centavos)}</b>`).join(" · ")}</div>` : ""}
+          <div class="etiquetas"><span class="etiqueta verde"><i class="ponto"></i>Aberto</span>${v.faz_entrega ? `<span class="etiqueta azul">🛵 Entrega</span>` : `<span class="etiqueta">Retirar no local</span>`}</div>
         </div>
+        <span class="seta" aria-hidden="true">›</span>
       </a>`;
     }).join("");
   }
@@ -112,16 +102,15 @@
     });
   }
   function cartaoMovimento() {
-    const r = Demo.resumo(), ev = Demo.eventos().slice(0, 4);
-    return `<div class="cartao movimento">
-      <div class="titulo-cartao"><span class="emoji">📡</span>Movimento agora na orla <span class="ao-vivo">● ao vivo</span></div>
+    const r = Demo.resumo(), ev = Demo.eventos().slice(0, 3);
+    return `<section class="movimento" aria-label="Movimento na orla">
+      <div class="movimento-topo"><span class="ao-vivo"><i></i>Ao vivo</span><b>Movimento na orla</b></div>
       <div class="contadores">
-        <div><b>${r.abertos}</b><span>abertos</span></div><div><b>${r.ambulantesAndando}</b><span>ambulantes andando</span></div>
-        <div><b>${r.pedidos}</b><span>pedidos hoje</span></div><div><b>${U.reais(r.faturamentoCentavos).replace(/,\d\d$/, "")}</b><span>vendido hoje</span></div>
+        <div><b>${r.abertos}</b><span>abertos</span></div><div><b>${r.ambulantesAndando}</b><span>andando</span></div>
+        <div><b>${r.pedidos}</b><span>pedidos hoje</span></div><div><b>${U.reais(r.faturamentoCentavos).replace(/,\d\d$/, "")}</b><span>vendido</span></div>
       </div>
       ${ev.map(e => `<div class="evento"><span>${e.emoji}</span><span>${e.texto}</span><small>${Math.max(1, Math.round((Date.now() - e.em) / 1000))} s</small></div>`).join("")}
-      <p class="nota" style="margin-top:6px">Simulação de homologação: nada disso é real.</p>
-    </div>`;
+    </section>`;
   }
   // O mapa ocupa o resto da tela do celular, sem precisar rolar.
   function ajustarAlturaMapa() {
@@ -192,6 +181,7 @@
         <p class="nota">O dinheiro vai direto para o vendedor.</p></div>` : ""}`;
   }
   function barraPedido() {
+    atualizarMenu();
     const barra = $("barra-pedido");
     const v = E.vitrine;
     if (!v || v === "fechado" || location.hash.startsWith("#/pedido")) { barra.hidden = true; return; }
@@ -208,7 +198,7 @@
     const total = itens.reduce((a, x) => a + x.qtd * x.p.preco_centavos, 0);
     if (!itens.length) return `<button class="link-botao" style="text-align:left" data-acao="voltar-vitrine">← Voltar</button><div class="cartao vazio"><p>Seu pedido está vazio.</p></div>`;
     return `
-      <button class="link-botao" style="text-align:left" data-acao="voltar-vitrine">← Voltar para ${esc(v.nome)}</button>
+      <button class="link-botao" style="text-align:left" data-acao="voltar-vitrine">← Voltar</button>
       <h1>Seu pedido</h1>
       <div class="cartao">
         ${itens.map(x => `<div class="resumo-item"><span>${x.qtd}× ${esc(x.p.nome)}</span><b>${U.reais(x.qtd * x.p.preco_centavos)}</b></div>`).join("")}
@@ -360,19 +350,51 @@
     // Homologação: a pessoa "está" na praia escolhida (sem usar o GPS de verdade).
     if (Demo.ativo && Demo.modoLocal() === "simulado") {
       E.voce = Object.assign({}, Demo.centro);
-      $("onde").textContent = `🧪 ${Demo.lugares[Demo.lugar()].nome} (simulado)`;
+      $("onde").textContent = `🧪 ${Demo.lugares[Demo.lugar()].nome}`;
       return atualizar();
     }
     U.posicao().then(pos => {
       E.voce = pos;
-      $("onde").textContent = "📍 Perto de você";
+      $("onde").textContent = "Minha localização real";
       return atualizar();
-    }).catch(() => { $("onde").textContent = "Libere a localização para ver o mais perto"; });
+    }).catch(() => { $("onde").textContent = "Toque para usar sua localização"; });
   }
   async function atualizar() {
     await buscar();
     if (!location.hash.startsWith("#/")) redesenhar();
   }
+
+  // ---------- folha "onde você está" (homologação) ----------
+  function abrirFolha() {
+    const f = $("folha"), simulado = Demo.modoLocal() === "simulado";
+    f.innerHTML = `<div class="folha-fundo" data-acao="fechar-folha"></div>
+      <div class="folha" role="dialog" aria-modal="true" aria-labelledby="folha-titulo">
+        <div class="puxador"></div>
+        <h2 id="folha-titulo">Onde você está?</h2>
+        <div class="alternar">
+          <button data-modo-local="simulado" class="${simulado ? "marcado" : ""}">🧪 Simulada</button>
+          <button data-modo-local="real" class="${!simulado ? "marcado" : ""}">📍 GPS real</button></div>
+        ${simulado ? `<div class="lugares">${Object.entries(Demo.lugares).map(([k, l]) => `
+          <button type="button" data-lugar="${k}" class="${k === Demo.lugar() ? "marcado" : ""}"><span>${l.nome}</span>${k === Demo.lugar() ? "<b>✓</b>" : ""}</button>`).join("")}</div>`
+        : `<p class="nota">Usando o GPS do celular. Longe de Fortaleza, as bancas fictícias aparecem bem distantes.</p>`}
+        <button class="botao secundario pequeno" data-acao="fechar-folha">Fechar</button>
+      </div>`;
+    f.hidden = false;
+  }
+  function fecharFolha() { $("folha").hidden = true; }
+  // Menu de baixo: só nas telas principais; marca onde a pessoa está.
+  function atualizarMenu() {
+    const h = location.hash, menu = $("menu");
+    menu.hidden = !!h && h !== "#/acompanhar";
+    menu.querySelectorAll("[data-modo]").forEach(b => b.setAttribute("aria-current", !h && E.modo === b.dataset.modo ? "page" : "false"));
+    const ap = $("aba-pedido");
+    ap.hidden = !Demo.ativo;
+    ap.setAttribute("aria-current", h === "#/acompanhar" ? "page" : "false");
+    const p = Demo.ativo && Demo.pedido();
+    $("aviso-pedido").hidden = !(p && !["entregue", "cancelado"].includes(p.status));
+    document.body.classList.toggle("com-menu", !menu.hidden);
+  }
+  setInterval(atualizarMenu, 2000);
 
   // ---------- toques ----------
   document.addEventListener("click", e => {
@@ -380,9 +402,11 @@
     const cat = t.closest("[data-categoria]");
     if (cat) { E.categoria = cat.dataset.categoria; return redesenhar(); }
     const ml = t.closest("[data-modo-local]");
-    if (ml) { Demo.definirModoLocal(ml.dataset.modoLocal); redesenhar(); localizar(); return; }
+    if (ml) { Demo.definirModoLocal(ml.dataset.modoLocal); abrirFolha(); localizar(); if (ml.dataset.modoLocal === "real") fecharFolha(); return; }
     const modo = t.closest("[data-modo]");
-    if (modo) { E.modo = modo.dataset.modo; return redesenhar(); }
+    if (modo) { E.modo = modo.dataset.modo; if (location.hash) location.hash = ""; else redesenhar(); return; }
+    const lg = t.closest("[data-lugar]");
+    if (lg) { Demo.definirLugar(lg.dataset.lugar); fecharFolha(); localizar(); U.avisar(`Você está em ${Demo.lugares[lg.dataset.lugar].nome}`); return; }
     const mais = t.closest("[data-mais]"), menos = t.closest("[data-menos]");
     if (mais || menos) {
       const c = carrinhoDe(E.vitrine.id), id = (mais || menos).dataset[mais ? "mais" : "menos"];
@@ -399,6 +423,9 @@
     if (acao === "inicio") location.hash = "";
     if (acao === "voltar-vitrine") location.hash = `#/v/${E.vitrine.id}`;
     if (acao === "localizar") localizar();
+    if (acao === "trocar-local") { if (Demo.ativo) abrirFolha(); else localizar(); }
+    if (acao === "fechar-folha") fecharFolha();
+    if (acao === "meu-pedido") location.hash = "#/acompanhar";
     if (acao === "copiar-pix") U.copiar(E.vitrine.pix_chave, "Chave Pix copiada");
     if (acao === "copiar-pix-pedido") U.copiar(Demo.pedido().vendedor.pix_chave, "Chave Pix copiada");
     if (acao === "cancelar-pedido") { Demo.cancelar(); ultimoStatus = null; }
@@ -438,7 +465,7 @@
     rota();
     localizar();
     if (Demo.ativo) {
-      document.body.insertAdjacentHTML("afterbegin", `<div class="faixa-demo">🧪 AMBIENTE DE HOMOLOGAÇÃO · bancas e pedidos fictícios em Fortaleza · <a href="?sair-demo">ver só reais</a></div>`);
+      document.body.insertAdjacentHTML("afterbegin", `<div class="faixa-demo">🧪 <b>Homologação</b> · dados fictícios · <a href="?sair-demo">ver reais</a></div>`);
       let ultimaBuscaReal = 0;
       setInterval(async () => {
         if (Date.now() - ultimaBuscaReal > 60e3) { await buscar(); ultimaBuscaReal = Date.now(); }
