@@ -1,0 +1,32 @@
+.status { text-align: center; }
+.status .grande-emoji { font-size: 54px; line-height: 1; }
+.status .titulo { font-size: 26px; font-weight: 800; color: var(--azul-escuro); margin: 6px 0; }
+.status.aberto { background: var(--verde-claro); border: 3px solid #9fd39a; }
+.botoes-lado { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.checklist .item { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.checklist .item + .item { border-top: 1px solid #e6edf7; }
+.checklist .item .marca { font-size: 26px; }
+.checklist .item .texto { flex: 1; }
+.checklist .item.feito .texto { color: var(--suave); text-decoration: line-through; }
+.checklist .item button { flex: none; padding: 8px 14px; border-radius: 20px; border: 2px solid var(--azul); background: #fff; color: var(--azul); font-weight: 700; font-size: 17px; }
+.produto { display: flex; gap: 12px; align-items: center; padding: 12px 0; }
+.produto + .produto { border-top: 1px solid #e6edf7; }
+.produto .mini { width: 72px; height: 72px; border-radius: 14px; flex: none; background: var(--areia) center / cover; display: grid; place-items: center; font-size: 32px; }
+.produto .info { flex: 1; min-width: 0; }
+.produto .nome-produto { font-weight: 800; overflow-wrap: anywhere; }
+.produto .preco { color: var(--verde); font-weight: 800; }
+.produto.acabou .nome-produto, .produto.acabou .preco { color: var(--suave); }
+.produto .lado { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.chave { border: none; border-radius: 20px; padding: 6px 12px; font-weight: 800; font-size: 16px; }
+.chave.tem { background: var(--verde-claro); color: var(--verde); }
+.chave.acabou { background: var(--vermelho-claro); color: var(--vermelho); }
+.sugestoes { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+.sugestoes button { border: 2px solid #d3deef; background: #fff; border-radius: 20px; padding: 7px 12px; font-size: 17px; font-weight: 600; color: var(--azul-escuro); }
+.categorias { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.categorias button { min-height: 66px; border: 3px solid var(--azul-claro); border-radius: 14px; background: #fff; font-weight: 700; font-size: 16px; color: var(--azul-escuro); }
+.categorias button .emoji { display: block; font-size: 24px; }
+.categorias button.marcado { border-color: var(--azul); background: var(--azul-claro); }
+.preco-campo { position: relative; }
+.preco-campo span { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-weight: 800; color: var(--suave); }
+.preco-campo .entrada { padding-left: 54px; }
+.voltar-link { text-align: left; padding: 4px 0 10px; margin: 0; }
