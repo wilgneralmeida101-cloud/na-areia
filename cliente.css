@@ -144,6 +144,7 @@ main { padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
 
 @media (min-width: 760px) {
   #mapa { height: 60vh; }
+  .topo { padding-left: max(16px, calc((100% - 732px) / 2)); padding-right: max(16px, calc((100% - 732px) / 2)); }
   .vitrine-capa { border-radius: 0 0 var(--raio) var(--raio); }
   .abas { max-width: 760px; margin: 0 auto; border-radius: 18px 18px 0 0; border: 1px solid var(--linha); }
 }
