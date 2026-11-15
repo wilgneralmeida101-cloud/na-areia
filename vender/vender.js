@@ -30,7 +30,8 @@
   function mensagemErro(e) {
     const m = (e && (e.message || e.error_description)) || "";
     if (/rate|too many|security purposes/i.test(m)) return "Muitas tentativas. Espere um minuto e tente de novo.";
-    if (/token|otp|expired|invalid/i.test(m)) return "Código errado ou vencido. Peça outro.";
+    if (/senha errados/.test(m)) return m;
+    if (/token|otp|expired/i.test(m)) return "Código errado ou vencido. Peça outro.";
     if (/fetch|network|Failed/i.test(m)) return "Sem internet. Tente de novo.";
     if (/denied|permission|location/i.test(m)) return "Libere a localização do celular e tente de novo.";
     return m || "Não deu certo. Tente de novo.";
@@ -88,8 +89,14 @@
         <p>Monte a vitrine da sua banca ou do seu carrinho e apareça para os clientes da praia.</p>
         <div class="campo"><label for="email">Seu e-mail</label>
           <input id="email" class="entrada" type="email" inputmode="email" autocomplete="email" placeholder="voce@email.com" value="${esc(E.email)}"></div>
-        <button class="botao" data-acao="pedir-codigo">Receber código</button>
-        <p class="nota">Sem senha: a cada entrada, chega um código no seu e-mail.</p>
+        ${E.etapaLogin === "senha" ? `
+          <div class="campo"><label for="senha">Senha</label>
+            <input id="senha" class="entrada" type="password" autocomplete="current-password" placeholder="Sua senha"></div>
+          <button class="botao" data-acao="entrar-senha">Entrar</button>
+          <button class="link-botao" data-acao="sem-senha">Não tenho senha: receber link no e-mail</button>`
+        : `<button class="botao" data-acao="pedir-codigo">Receber link no e-mail</button>
+          <button class="link-botao" data-acao="com-senha">Já criei uma senha: entrar com senha</button>
+          <p class="nota">Na primeira vez, chega um link no seu e-mail. Depois você pode criar uma senha em "Minha banca".</p>`}
       </div>`;
   }
 
@@ -126,7 +133,13 @@
           ${escolha("entrega", [["nao", "Não"], ["sim", "Sim, levo"]], r.entrega)}</div>
         <button class="botao verde" data-acao="salvar-perfil">${primeira ? "Continuar →" : "💾 Salvar"}</button>
       </div>
-      ${primeira ? "" : `<button class="link-botao" data-acao="sair">Sair desta conta</button>`}`;
+      ${primeira ? "" : `
+      <div class="cartao"><div class="titulo-cartao"><span class="emoji">🔑</span>Senha para entrar rápido</div>
+        <p class="suave">Opcional. Com senha, você entra sem esperar o e-mail.</p>
+        <div class="campo"><label for="nova-senha">Nova senha</label>
+          <input id="nova-senha" class="entrada" type="password" autocomplete="new-password" placeholder="Pelo menos 6 letras ou números"></div>
+        <button class="botao secundario pequeno" data-acao="criar-senha">🔑 Salvar senha</button></div>
+      <button class="link-botao" data-acao="sair">Sair desta conta</button>`}`;
   }
   function lerRascunhoPerfil() {
     if (!$("p-nome") || !E.rascunho) return;
@@ -365,6 +378,30 @@
       });
     },
     "outro-email": () => { E.etapaLogin = "email"; mostrar(); },
+    "com-senha": () => { E.email = $("email").value.trim(); E.etapaLogin = "senha"; mostrar(); setTimeout(() => $("senha") && $("senha").focus(), 100); },
+    "sem-senha": () => { E.email = $("email").value.trim(); E.etapaLogin = "email"; mostrar(); },
+    "entrar-senha": () => {
+      const email = $("email").value.trim().toLowerCase(), password = $("senha").value;
+      if (!/^\S+@\S+\.\S+$/.test(email) || !password) return U.avisar("Coloque o e-mail e a senha");
+      E.email = email;
+      tentar(async () => {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw new Error(/invalid/i.test(error.message) ? "E-mail ou senha errados. Se ainda não criou senha, entre pelo link do e-mail." : error.message);
+        E.eu = data.user;
+        await carregar();
+        E.tela = E.perfil ? "inicio" : "perfil";
+        mostrar(); seguirPosicao();
+      });
+    },
+    "criar-senha": () => {
+      const s1 = $("nova-senha").value;
+      if (s1.length < 6) return U.avisar("A senha precisa ter pelo menos 6 letras ou números");
+      tentar(async () => {
+        const { error } = await sb.auth.updateUser({ password: s1 });
+        if (error) throw error;
+        $("nova-senha").value = "";
+      }, "Senha criada! Na próxima vez, entre com e-mail e senha");
+    },
     sair: () => tentar(async () => {
       if (!confirm("Sair desta conta neste celular?")) return;
       await sb.auth.signOut();
@@ -420,9 +457,13 @@
     if (e.key !== "Enter") return;
     if (e.target.id === "email") ACOES["pedir-codigo"]();
     if (e.target.id === "codigo") ACOES.verificar();
+    if (e.target.id === "senha") ACOES["entrar-senha"]();
   });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && E.perfil && E.perfil.aberto) seguirPosicao(); });
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
+
+  if (window.NUVEM && NUVEM.homologacao) document.body.insertAdjacentHTML("afterbegin",
+    `<div class="faixa-demo">🧪 AMBIENTE DE HOMOLOGAÇÃO · testes · o app dos clientes mostra também bancas fictícias</div>`);
 
   // ---------- começo ----------
   (async () => {

@@ -1,6 +1,6 @@
 // Guarda as telas para abrir rápido. Dados (bancas, produtos, pedidos) sempre vêm da internet.
-const VERSAO = "na-areia-cliente-v1";
-const ARQUIVOS = ["./", "index.html", "cliente.css", "cliente.js", "comum/base.css", "comum/util.js", "comum/config.js", "icone.svg", "icone-192.png", "manifest.webmanifest"];
+const VERSAO = "na-areia-cliente-v3";
+const ARQUIVOS = ["./", "index.html", "cliente.css", "cliente.js", "comum/base.css", "comum/util.js", "comum/config.js", "demo.js", "icone.svg", "icone-192.png", "manifest.webmanifest"];
 self.addEventListener("install", e => e.waitUntil(caches.open(VERSAO).then(c => c.addAll(ARQUIVOS)).then(() => self.skipWaiting())));
 self.addEventListener("activate", e => e.waitUntil(caches.keys()
   .then(ks => Promise.all(ks.filter(k => k.startsWith("na-areia-cliente") && k !== VERSAO).map(k => caches.delete(k))))

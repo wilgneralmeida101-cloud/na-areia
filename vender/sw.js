@@ -1,5 +1,5 @@
 // Guarda as telas para abrir rápido. Dados (bancas, produtos, pedidos) sempre vêm da internet.
-const VERSAO = "na-areia-vendedor-v1";
+const VERSAO = "na-areia-vendedor-v3";
 const ARQUIVOS = ["./", "index.html", "vender.css", "vender.js", "../comum/base.css", "../comum/util.js", "../comum/config.js", "../icone-vendedor.svg", "manifest.webmanifest"];
 self.addEventListener("install", e => e.waitUntil(caches.open(VERSAO).then(c => c.addAll(ARQUIVOS)).then(() => self.skipWaiting())));
 self.addEventListener("activate", e => e.waitUntil(caches.keys()

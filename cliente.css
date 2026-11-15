@@ -54,3 +54,31 @@ main { padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
 .resumo-item { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; }
 .total { display: flex; justify-content: space-between; font-size: 24px; font-weight: 800; border-top: 2px solid #e6edf7; margin-top: 8px; padding-top: 10px; }
 @media (min-width: 760px) { #mapa { height: 60vh; } .vitrine-capa { border-radius: 0 0 var(--raio) var(--raio); } }
+
+/* demonstração e acompanhamento do pedido */
+.faixa-demo { background: var(--amarelo); color: #3d2e00; text-align: center; font-weight: 800; font-size: 16px; padding: 6px 10px calc(6px); }
+.faixa-demo a { color: var(--azul-escuro); }
+.passos-pedido { padding: 8px 16px; }
+.passo-pedido { display: flex; gap: 14px; align-items: center; padding: 10px 0; color: #9aa3b0; }
+.passo-pedido + .passo-pedido { border-top: 1px solid #e6edf7; }
+.passo-pedido .bolinha { width: 44px; height: 44px; flex: none; display: grid; place-items: center; font-size: 24px; border-radius: 50%; background: var(--fundo); }
+.passo-pedido.feito { color: var(--texto); }
+.passo-pedido.atual { color: var(--azul-escuro); }
+.passo-pedido.atual .bolinha { background: var(--azul-claro); box-shadow: 0 0 0 4px rgba(19,81,180,.15); animation: pulsar 1.4s infinite; }
+@keyframes pulsar { 50% { box-shadow: 0 0 0 9px rgba(19,81,180,.05); } }
+#mapa-pedido { height: 240px; border-radius: var(--raio); margin-bottom: 14px; box-shadow: var(--sombra); z-index: 0; }
+
+.movimento { border: 2px solid #f2d36b; background: #fffdf3; }
+.movimento .ao-vivo { margin-left: auto; font-size: 15px; color: var(--vermelho); animation: piscar 1.6s infinite; }
+@keyframes piscar { 50% { opacity: .35; } }
+.contadores { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 4px 0 8px; text-align: center; }
+.contadores div { background: #fff; border-radius: 12px; padding: 8px 2px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.contadores b { display: block; font-size: 22px; color: var(--azul-escuro); line-height: 1.1; }
+.contadores span { font-size: 13px; color: var(--suave); line-height: 1.1; display: block; }
+.evento { display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: start; font-size: 17px; padding: 6px 0; border-top: 1px solid #f1e6bf; }
+.evento small { color: var(--suave); font-size: 14px; white-space: nowrap; }
+.evento > span:first-child { font-size: 20px; }
+
+.lugar-sim { background: #fffdf3; border: 2px dashed #f2d36b; border-radius: 14px; padding: 10px 12px; }
+.lugar-sim label { font-size: 17px; margin-bottom: 6px; }
+.lugar-sim .entrada { min-height: 50px; background: #fff; font-size: 20px; }

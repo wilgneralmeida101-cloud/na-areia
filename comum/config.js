@@ -4,4 +4,6 @@
 window.NUVEM = {
   url: "https://bewgkinupovfosvaztxz.supabase.co",
   chave: "sb_publishable_m9_7BUz54pRMoYFzxy7Rcg_ctOjghdA",
+  // Enquanto não há operação real: mostra a faixa de homologação e (no app do cliente) a simulação de Fortaleza.
+  homologacao: true,
 };
