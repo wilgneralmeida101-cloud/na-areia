@@ -74,7 +74,8 @@
     if (E.etapaLogin === "codigo") return `
       <h1>Digite o código</h1>
       <div class="cartao">
-        <p>Mandamos um código para <b>${esc(E.email)}</b>. Abra seu e-mail e digite os números aqui.</p>
+        <p>Mandamos um e-mail para <b>${esc(E.email)}</b>.</p>
+        <p><b>Neste celular,</b> abra o e-mail e toque no link. Se o e-mail trouxer um código de números, pode digitar aqui:</p>
         <div class="campo"><label for="codigo">Código</label>
           <input id="codigo" class="entrada codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="000000"></div>
         <button class="botao" data-acao="verificar">Entrar</button>
@@ -344,7 +345,8 @@
       if (!/^\S+@\S+\.\S+$/.test(email)) return U.avisar("Confira o e-mail");
       E.email = email;
       tentar(async () => {
-        const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+        // O e-mail traz um link (sempre) e um código de 6 números (quando o modelo de e-mail tiver {{ .Token }}).
+        const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: new URL("./", location.href).href } });
         if (error) throw error;
         E.etapaLogin = "codigo"; mostrar();
         setTimeout(() => $("codigo") && $("codigo").focus(), 100);
@@ -425,6 +427,12 @@
   // ---------- começo ----------
   (async () => {
     if (!sb) { E.tela = "sem-nuvem"; return mostrar(); }
+    // Voltou do link do e-mail com erro (link vencido ou já usado)?
+    const volta = new URLSearchParams(location.hash.slice(1));
+    if (volta.get("error")) {
+      history.replaceState(null, "", location.pathname);
+      setTimeout(() => U.avisar("Esse link venceu ou já foi usado. Peça outro e-mail."), 300);
+    }
     try {
       const { data } = await sb.auth.getSession();
       if (!data.session) { E.tela = "entrar"; return mostrar(); }

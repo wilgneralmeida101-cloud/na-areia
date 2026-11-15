@@ -2,6 +2,6 @@
 // quem protege os dados são as regras em supabase/schema.sql.
 // Nunca coloque aqui a chave "service_role"/"secret" nem a senha do banco.
 window.NUVEM = {
-  url: "",   // ex.: https://xxxxxxxx.supabase.co
-  chave: "", // chave anon / publishable
+  url: "https://bewgkinupovfosvaztxz.supabase.co",
+  chave: "sb_publishable_m9_7BUz54pRMoYFzxy7Rcg_ctOjghdA",
 };
